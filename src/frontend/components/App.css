@@ -36,3 +36,17 @@
     transform: rotate(360deg);
   }
 }
+
+.active_img {
+  width: 32px;
+  height: 32px;
+}
+
+.active_content{
+  font-size: 14px;
+}
+
+.follow_img{
+  width: 64px;
+  height: 64px;
+}

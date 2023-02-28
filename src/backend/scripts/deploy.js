@@ -7,13 +7,16 @@ async function main() {
   
   // Get the ContractFactories and Signers here.
   const NFT = await ethers.getContractFactory("NFT");
-  const Marketplace = await ethers.getContractFactory("Marketplace");
+  const Authwork = await ethers.getContractFactory("Authwork");
+  const Postwork = await ethers.getContractFactory("Postwork");
   // deploy contracts
-  const marketplace = await Marketplace.deploy(1);
+  const authwork = await Authwork.deploy(1);
+  const postwork = await Postwork.deploy(1);
   const nft = await NFT.deploy();
   // Save copies of each contracts abi and address to the frontend.
-  saveFrontendFiles(marketplace , "Marketplace");
+  saveFrontendFiles(authwork , "Authwork");
   saveFrontendFiles(nft , "NFT");
+  saveFrontendFiles(postwork , "Postwork");
 }
 
 function saveFrontendFiles(contract, name) {

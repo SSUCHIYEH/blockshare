@@ -7,39 +7,37 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 import "hardhat/console.sol";
 
-contract Marketplace is ReentrancyGuard {
+contract Postwork is ReentrancyGuard {
 
     // Variables
     address payable public immutable feeAccount; // the account that receives fees
     uint public immutable feePercent; // the fee percentage on sales 
     uint public itemCount; 
+    uint public price = 1;
 
     struct Item {
         uint itemId;
         IERC721 nft;
         uint tokenId;
-        uint price;
-        address payable seller;
+        address payable owner;
         bool sold;
     }
 
     // itemId -> Item
     mapping(uint => Item) public items;
 
-    event Offered(
+    event Posted(
         uint itemId,
         address indexed nft,
         uint tokenId,
-        uint price,
-        address indexed seller
+        address indexed owner
     );
-    event Bought(
+    event Liked(
         uint itemId,
         address indexed nft,
         uint tokenId,
-        uint price,
-        address indexed seller,
-        address indexed buyer
+        address indexed owner,
+        address indexed liker
     );
 
     constructor(uint _feePercent) {
@@ -48,8 +46,7 @@ contract Marketplace is ReentrancyGuard {
     }
 
     // Make item to offer on the marketplace
-    function makeItem(IERC721 _nft, uint _tokenId, uint _price) external nonReentrant {
-        require(_price > 0, "Price must be greater than zero");
+    function makeItem(IERC721 _nft, uint _tokenId) external nonReentrant {
         // increment itemCount
         itemCount ++;
         // transfer nft
@@ -59,44 +56,41 @@ contract Marketplace is ReentrancyGuard {
             itemCount,
             _nft,
             _tokenId,
-            _price,
             payable(msg.sender),
             false
         );
-        // emit Offered event
-        emit Offered(
-            itemCount,
-            address(_nft),
-            _tokenId,
-            _price,
+    }
+
+    function postItem(uint _itemId) external payable nonReentrant {
+
+        Item storage item = items[_itemId];
+        require(_itemId > 0 && _itemId <= itemCount, "item doesn't exist");
+        require(!item.sold, "item already sold");
+        // update item to sold
+        item.owner = payable(msg.sender);
+        item.sold = true;
+        // transfer nft to buyer
+        item.nft.transferFrom(address(this), msg.sender, item.tokenId);
+
+        emit Posted(
+            _itemId,
+            address(item.nft),
+            item.tokenId,
             msg.sender
         );
     }
 
-    function purchaseItem(uint _itemId) external payable nonReentrant {
-        uint _totalPrice = getTotalPrice(_itemId);
+    function likeItem(uint _itemId) external payable nonReentrant {
+
         Item storage item = items[_itemId];
         require(_itemId > 0 && _itemId <= itemCount, "item doesn't exist");
-        require(msg.value >= _totalPrice, "not enough ether to cover item price and market fee");
-        require(!item.sold, "item already sold");
-        // pay seller and feeAccount
-        item.seller.transfer(item.price);
-        feeAccount.transfer(_totalPrice - item.price);
-        // update item to sold
-        item.sold = true;
-        // transfer nft to buyer
-        item.nft.transferFrom(address(this), msg.sender, item.tokenId);
         // emit Bought event
-        emit Bought(
+        emit Liked(
             _itemId,
             address(item.nft),
             item.tokenId,
-            item.price,
-            item.seller,
+            item.owner,
             msg.sender
         );
-    }
-    function getTotalPrice(uint _itemId) view public returns(uint){
-        return((items[_itemId].price*(100 + feePercent))/100);
     }
 }

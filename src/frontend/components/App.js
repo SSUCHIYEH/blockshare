@@ -6,13 +6,18 @@ import {
 import Navigation from './Navbar';
 import Home from './Home.js'
 import Create from './Create.js'
+import Singup from "./Singup";
 import Login  from "./Login";
 import MyListedItems from './MyListedItems.js'
 import MyPurchases from './MyPurchases.js'
-import MarketplaceAbi from '../contractsData/Marketplace.json'
-import MarketplaceAddress from '../contractsData/Marketplace-address.json'
+
+import AuthworkAbi from '../contractsData/Authwork.json'
+import AuthworkAddress from '../contractsData/Authwork-address.json'
 import NFTAbi from '../contractsData/NFT.json'
 import NFTAddress from '../contractsData/NFT-address.json'
+import PostworkAbi from '../contractsData/Postwork.json'
+import PostworkAddress from '../contractsData/Postwork-address.json'
+
 import { useState } from 'react'
 import { ethers } from "ethers"
 import { Spinner } from 'react-bootstrap'
@@ -22,8 +27,11 @@ function App() {
   const [loading, setLoading] = useState(true)
   const [account, setAccount] = useState(null)
   const [nft, setNFT] = useState({})
-  const [marketplace, setMarketplace] = useState({})
+  const [postwork, setPostwork] = useState({})
+  const [authwork, setAuthwork] = useState({})
   const [hasNFT, setHasNFT] = useState(false)
+  const [name, setName] = useState("")
+  const [image, setImage] = useState("")
 
   // MetaMask Login/Connect
   const web3Handler = async () => {
@@ -42,32 +50,41 @@ function App() {
       setAccount(accounts[0])
       await web3Handler()
     })
-    loadContracts(signer)
+    loadContracts(signer,accounts[0])
   }
-  const loadContracts = async (signer) => {
+  const loadContracts = async (signer,acco) => {
     // Get deployed copies of contracts
-    const marketplace = new ethers.Contract(MarketplaceAddress.address, MarketplaceAbi.abi, signer)
-    setMarketplace(marketplace)
+    const authwork = new ethers.Contract(AuthworkAddress.address, AuthworkAbi.abi, signer)
+    setAuthwork(authwork)
     const nft = new ethers.Contract(NFTAddress.address, NFTAbi.abi, signer)
     setNFT(nft)
-    setLoading(false)
-    console.log(marketplace)
-    checkHasNFT(marketplace)
+    const postwork = new ethers.Contract(PostworkAddress.address, PostworkAbi.abi, signer)
+    setPostwork(postwork)
+
+    checkHasNFT(authwork,acco,nft)
   }
 
-  const checkHasNFT = async(marketplace) => {
-    console.log(marketplace)
-    const filter =  marketplace.filters.Bought(null,null,null,null,null,account)
-    const results = await marketplace.queryFilter(filter)
+  const checkHasNFT = async(authwork,acco,nft) => {
+    const filter =  authwork.filters.Register(null,null,null,acco)
+    const results = await authwork.queryFilter(filter)
     console.log(results)
-    if(results.length > 0) setHasNFT(true)
+    if(results.length > 0){
+      const authNFT = await nft.tokenURI(results[0].args.tokenId)
+      console.log(authNFT)
+      const response = await fetch(authNFT)
+      const metadata = await response.json()
+      setName(metadata.name)
+      setImage(metadata.image)
+      setHasNFT(true)
+    }
+    setLoading(false)
   }
 
   return (
     <BrowserRouter>
       <div className="App">
         <>
-          <Navigation web3Handler={web3Handler} account={account} />
+          <Navigation web3Handler={web3Handler} account={account} name={name} image={image}/>
         </>
         <div>
           {loading ? (
@@ -79,17 +96,22 @@ function App() {
               <>
                 { hasNFT ? (
                   <Routes>
-                  <Route path="/" element={
-                    <Home marketplace={marketplace} nft={nft} account={account} />
-                  } />
-                  <Route path="/create" element={
-                    <Create marketplace={marketplace} nft={nft} />
-                  } />
-                </Routes>
+                    <Route path="/" element={
+                      <Home postwork={postwork} account={account} authwork={authwork} />
+                    } />
+                    <Route path="/create" element={
+                      <Create authwork={authwork} nft={nft} postwork={postwork} />
+                    } />
+                  </Routes>
                 ) : (
-                  <div>
-                    還沒登入
-                  </div>
+                  <Routes>
+                    <Route path="/create" element={
+                      <Create authwork={authwork} nft={nft} postwork={postwork} />
+                    } />
+                    <Route path="/signup" element={
+                      <Singup authwork={authwork} nft={nft} />
+                    } />
+                  </Routes>
                 ) }
               </>
           )}
