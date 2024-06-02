@@ -7,13 +7,18 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 import "hardhat/console.sol";
 
-contract Postwork is ReentrancyGuard {
+interface IERC20 {
+    function transferFrom(address from, address to, uint256 amount) external returns (bool);
+    function approve(address spender, uint256 amount) external returns (bool);
+    function transfer(address to, uint256 amount) external returns (bool);
+}
 
-    // Variables
-    address payable public immutable feeAccount; // the account that receives fees
-    uint public immutable feePercent; // the fee percentage on sales 
+contract Postwork is ReentrancyGuard {
+    address payable tokenOwner;
+    IERC20 public token;
     uint public itemCount; 
     uint public price = 1;
+    uint256 public rewardAmount = 1 * (10**18);
 
     struct Item {
         uint itemId;
@@ -30,28 +35,42 @@ contract Postwork is ReentrancyGuard {
         uint itemId,
         address indexed nft,
         uint tokenId,
-        address indexed owner
+        address indexed owner,
+        bool member
     );
     event Liked(
         uint itemId,
         address indexed nft,
         uint tokenId,
-        address indexed owner,
+        address payable owner,
         address indexed liker
     );
 
-    constructor(uint _feePercent) {
-        feeAccount = payable(msg.sender);
-        feePercent = _feePercent;
+    event Twit(
+        uint itemId,
+        address indexed nft,
+        uint tokenId,
+        address payable owner,
+        address indexed titter
+    );
+
+    event Record(
+        uint time,
+        address indexed owner,
+        address indexed trigger,
+        string state
+    );
+
+    constructor(address tokenAddress) {
+        token = IERC20(tokenAddress);
+        tokenOwner = payable(msg.sender);
     }
 
     // Make item to offer on the marketplace
-    function makeItem(IERC721 _nft, uint _tokenId) external nonReentrant {
+    function postItem(bool member,IERC721 _nft, uint _tokenId) external nonReentrant {
         // increment itemCount
         itemCount ++;
-        // transfer nft
-        _nft.transferFrom(msg.sender, address(this), _tokenId);
-        // add new item to items mapping
+
         items[itemCount] = Item (
             itemCount,
             _nft,
@@ -59,32 +78,39 @@ contract Postwork is ReentrancyGuard {
             payable(msg.sender),
             false
         );
-    }
-
-    function postItem(uint _itemId) external payable nonReentrant {
-
-        Item storage item = items[_itemId];
-        require(_itemId > 0 && _itemId <= itemCount, "item doesn't exist");
-        require(!item.sold, "item already sold");
-        // update item to sold
-        item.owner = payable(msg.sender);
-        item.sold = true;
-        // transfer nft to buyer
-        item.nft.transferFrom(address(this), msg.sender, item.tokenId);
 
         emit Posted(
-            _itemId,
-            address(item.nft),
-            item.tokenId,
-            msg.sender
+            itemCount,
+            address(_nft),
+            _tokenId,
+            msg.sender,
+            member
         );
     }
 
-    function likeItem(uint _itemId) external payable nonReentrant {
+    // function postItem(uint _itemId) external payable nonReentrant {
+
+    //     Item storage item = items[_itemId];
+    //     require(_itemId > 0 && _itemId <= itemCount, "item doesn't exist");
+    //     require(!item.sold, "item already sold");
+    //     // update item to sold
+    //     item.owner = payable(msg.sender);
+    //     item.sold = true;
+    //     // transfer nft to buyer
+    //     item.nft.transferFrom(address(this), msg.sender, item.tokenId);
+
+    //     emit Posted(
+    //         _itemId,
+    //         address(item.nft),
+    //         item.tokenId,
+    //         msg.sender
+    //     );
+    // }
+
+    function likeItem(uint _itemId) public {
 
         Item storage item = items[_itemId];
-        require(_itemId > 0 && _itemId <= itemCount, "item doesn't exist");
-        // emit Bought event
+
         emit Liked(
             _itemId,
             address(item.nft),
@@ -92,5 +118,16 @@ contract Postwork is ReentrancyGuard {
             item.owner,
             msg.sender
         );
+
+        emit Record(
+            block.timestamp,
+            item.owner,
+            msg.sender,
+            'like'
+        );
+    }
+
+    function airdrop() external payable nonReentrant {
+        token.transferFrom(tokenOwner,msg.sender, rewardAmount);
     }
 }

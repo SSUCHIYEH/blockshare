@@ -37,6 +37,18 @@ contract Authwork is ReentrancyGuard {
         address indexed follow
     );
 
+    event Record(
+        uint time,
+        address indexed owner,
+        address indexed trigger,
+        string state
+    );
+
+    event Member(
+        address indexed creator,
+        address indexed fans
+    );
+
     constructor(uint _feePercent) {
         feeAccount = payable(msg.sender);
         feePercent = _feePercent;
@@ -76,6 +88,26 @@ contract Authwork is ReentrancyGuard {
         emit Follow(
             msg.sender,
             user
+        );
+        emit Record(
+            block.timestamp,
+            user,
+            msg.sender,
+            'follow'
+        );
+        return(true);
+    }
+
+    function Subscribe(address user) public returns (bool) {
+        emit Member(
+            msg.sender,
+            user
+        );
+        emit Record(
+            block.timestamp,
+            user,
+            msg.sender,
+            'subscrib'
         );
         return(true);
     }

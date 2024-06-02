@@ -1,22 +1,16 @@
+const hre = require("hardhat");
+
 async function main() {
   const [deployer] = await ethers.getSigners();
-
   console.log("Deploying contracts with the account:", deployer.address);
   console.log("Account balance:", (await deployer.getBalance()).toString());
 
-  
-  // Get the ContractFactories and Signers here.
-  const NFT = await ethers.getContractFactory("NFT");
-  const Authwork = await ethers.getContractFactory("Authwork");
-  const Postwork = await ethers.getContractFactory("Postwork");
-  // deploy contracts
-  const authwork = await Authwork.deploy(1);
-  const postwork = await Postwork.deploy('0x5FbDB2315678afecb367f032d93F642f64180aa3');
-  const nft = await NFT.deploy();
-  // Save copies of each contracts abi and address to the frontend.
-  saveFrontendFiles(authwork , "Authwork");
-  saveFrontendFiles(nft , "NFT");
-  saveFrontendFiles(postwork , "Postwork");
+  const NewToken = await ethers.getContractFactory("NewToken");
+  const newToken = await NewToken.deploy(100000000, 50);
+
+  await newToken.deployed();
+  console.log("New Token deployed: ", newToken.address);
+  saveFrontendFiles(newToken , "NewToken");
 }
 
 function saveFrontendFiles(contract, name) {
@@ -40,9 +34,7 @@ function saveFrontendFiles(contract, name) {
   );
 }
 
-main()
-  .then(() => process.exit(0))
-  .catch(error => {
-    console.error(error);
-    process.exit(1);
-  });
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});
