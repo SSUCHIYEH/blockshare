@@ -4,29 +4,38 @@ import {
 import { Navbar, Nav, Button, Container, Form } from 'react-bootstrap'
 import market from './market.png'
 import { useState } from "react";
+import { useSelector, useDispatch } from 'react-redux'
+import { setSearchAsync } from "../reducer/slice";
 
-const Navigation = ({ web3Handler, account, name, image }) => {
+const Navigation = ({ web3Handler }) => {
   const [input, setInput] =  useState("")
-  
+  const {account,name,image} = useSelector((state) => state.home)
+  const dispatch = useDispatch()
+  const searchInput = () =>{
+    dispatch(setSearchAsync(input))
+  }
   return (
-    <Navbar expand="lg" bg="white" variant="dark">
+    <Navbar expand="lg" className="border-bottom border-1 border-light">
       <Container>
         <Navbar.Collapse id="responsive-navbar-nav">
           <Nav className="w-100  justify-content-between">
             <Navbar.Brand>
-            <div className="text-primary fw-bold" >TAPTAP</div>
+              <Link to='/' className="text-decoration-none">
+                <div className="text-black fw-bold nav_logo" >BLOCSHARE</div>
+              </Link>
             </Navbar.Brand>
-            <div>
+            {/* <div>
               <input onChange={(e) => setInput(e.target.value)}/>
-              <Button>search</Button>
-            </div>
-            {account ? (
+              <Button onClick={searchInput}>search</Button>
+            </div> */}
+            {name ? (
               <div className="d-flex">
-                <img alt="" src={image ? image : ""} className='active_img rounded-circle'/>
-                <div className="text-primary ms-2">{name ? name : account}</div>
+                <img alt="" src={image ? image : ""} className='active_img rounded-3'/>
+                <Link to={`/personal/${account}`} className="ms-2 text-black">{name}</Link>
               </div>
             ) : (
-                <Button onClick={web3Handler} variant="outline-primary">Connect Wallet</Button>
+              <></>
+                // <Button onClick={web3Handler} variant="outline-primary">Connect Wallet</Button>
             )}
           </Nav>
         </Navbar.Collapse>

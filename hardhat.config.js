@@ -15,7 +15,7 @@ module.exports = {
   etherscan: {
     apiKey: process.env.POLYGONSCAN_API_KEY
   },
-  solidity: "0.8.4",
+  solidity: "0.8.17",
   paths: {
     artifacts: "./src/backend/artifacts",
     sources: "./src/backend/contracts",

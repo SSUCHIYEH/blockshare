@@ -20,7 +20,6 @@ const Create = ({ authwork, nft, postwork }) => {
     }
   }
   const mintThenList = async () => {
-    console.log('auth')
     // mint nft 
     await(await nft.mint(URI)).wait()
     // get tokenId of new nft 
@@ -30,11 +29,9 @@ const Create = ({ authwork, nft, postwork }) => {
     await(await nft.setApprovalForAll(authwork.address, true)).wait()
 
     await(await authwork.makeItem(nft.address, id)).wait()
-    console.log('auth makeItem')
   }
 
   const mintPost = async () => {
-    console.log('post')
     // mint nft 
     await(await nft.mint(URI)).wait()
     // get tokenId of new nft 
@@ -43,7 +40,6 @@ const Create = ({ authwork, nft, postwork }) => {
     await(await nft.setApprovalForAll(postwork.address, true)).wait()
     // add nft to marketplace
     await(await postwork.makeItem(nft.address, id)).wait()
-    console.log('makepostItem')
   }
 
   return (

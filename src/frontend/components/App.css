@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Secular+One&display=swap');
+
 .App {
   text-align: center;
 }
@@ -37,6 +39,85 @@
   }
 }
 
+/* ---------- font ------------*/
+.text-sm{
+  font-size: 14px;
+}
+
+.text-xxxl{
+  font-size: 100px;
+}
+
+.text-lg{
+  font-size: 32px;
+}
+
+.font-secular{
+  font-family: 'Secular One', sans-serif;
+}
+
+.text-purple-100{
+  color: #F9F9FF;
+}
+
+.text-purple-200{
+  color: #AE9EEF;
+}
+
+.text-black{
+  color: #38383A;
+}
+/* ------------ color -------------- */
+.bg-white-20{
+  background-color: rgba(255, 255, 255, 0.2);
+}
+.bg-white-linear{
+  background: linear-gradient(180deg, rgba(41, 32, 118, 0.56) 0%, rgba(55, 69, 109, 0.22) 100%);
+}
+
+.bg-purple-100{
+  background-color: #F9F9FF;
+}
+
+.bg-purple-blue-linear{
+  background: linear-gradient(90deg, #a47be5, #2C80F5);
+}
+
+.bg-blue-linear{
+  background: linear-gradient(180deg, #424C7B 0%, #3D357D 100%);
+}
+
+.shadow-md{
+  box-shadow: 3px 3px 5px rgba(164, 123, 229, 0.25);
+}
+
+.cursor-pointer{
+  cursor: pointer;
+}
+
+
+.app_bg{
+  background: linear-gradient(135deg,#3D739F, #564F87);
+}
+
+.copy_btn{
+  width: 24px;
+  height: 24px;
+}
+
+.copy_btn:focus {
+  outline: none;
+  border: none;
+}
+
+.nav_logo{
+  font-family: 'Secular One', sans-serif;
+}
+
+.nav_bg{
+  background-color: #242453;
+}
+
 .active_img {
   width: 32px;
   height: 32px;
@@ -49,4 +130,46 @@
 .follow_img{
   width: 64px;
   height: 64px;
+}
+
+.bg_personal{
+  height: 128px;
+  position: relative;
+}
+
+.bg_yellow{
+  background-color: #FFCD3D;
+  border-top-right-radius: 8px;
+  border-top-left-radius: 8px;
+  font-weight: bold;
+  font-size: 20px;
+}
+
+.head_photo{
+  width: 64px;
+  height: 64px;
+  position: absolute;
+  bottom: 0px;
+  left:32px
+}
+
+.personal_btn{
+  position: absolute;
+  right: 0;
+}
+
+.h-100vh{
+  min-height: 100vh;
+}
+
+.signup-title{
+  font-size: 100px;
+}
+
+.signup-subtitle{
+  font-size: 32px;
+}
+
+.modal {
+  margin-top: 240px;
 }
